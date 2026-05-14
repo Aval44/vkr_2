@@ -2,7 +2,7 @@
 #PLOTTING                     =
 #==============================
 
-def save_picture(p, title, save_pic):
+def save_picture(p, title, save_pic, dpi):
     if save_pic:
         if isinstance(save_pic, str):
             p.save(f'/Users/hello/Desktop/Диплом/Тексты/Картинки/{save_pic}.png', dpi=dpi)
@@ -177,7 +177,7 @@ def ridge_2_barplot(
         )
         + scale_fill_identity()
     )
-    save_picture(p, title, save_pic)
+    save_picture(p, title, save_pic, dpi)
              
     return(p)
 
@@ -287,7 +287,7 @@ def compare_2_barplots(
             panel_grid_minor_y=element_line(color='grey', size=0.1),
         )
     )
-    save_picture(p, title, save_pic)
+    save_picture(p, title, save_pic, dpi)
              
     return(p)
 
@@ -363,7 +363,7 @@ def do_simple_bar(
             panel_grid_minor_y=element_line(color='grey', size=0.1),
         )
     )
-    save_picture(p, title, save_pic)
+    save_picture(p, title, save_pic, dpi)
              
     return(p)
 
@@ -479,7 +479,7 @@ def compare_distributions(
             panel_grid_minor_y=element_line(color='grey', size=0.1),
         )
     )
-    save_picture(p, title, save_pic)
+    save_picture(p, title, save_pic, dpi)
              
     return(p)
 
@@ -563,7 +563,7 @@ def do_count_hist(
             panel_grid_minor_y=element_line(color='grey', size=0.1),
         )
     )
-    save_picture(p, title, save_pic)
+    save_picture(p, title, save_pic, dpi)
              
     return(p)
 
@@ -662,7 +662,7 @@ def do_lineplots(
             panel_grid_minor=element_blank(), #ADD logic!
         )
     )
-    save_picture(p, title, save_pic)
+    save_picture(p, title, save_pic, dpi)
              
     return(p)    
 
@@ -879,7 +879,7 @@ def do_scatter(
             panel_grid_minor=element_line(color='#B0A5A5', size=0.35),
         )
     )
-    save_picture(p, title, save_pic)
+    save_picture(p, title, save_pic, dpi)
              
     return(p)
 
@@ -995,7 +995,7 @@ def do_heat_triangle(
     if rotate_x_ticks:
         p= p + theme(axis_text_x=element_text(rotation=rotate_x_ticks, family="Arial", weight='light', hjust=1))
 
-    save_picture(p, title, save_pic)
+    save_picture(p, title, save_pic, dpi)
              
     return(p)
 
@@ -1314,7 +1314,7 @@ def do_jitterplot(
 
         )
     )
-    save_picture(p, title, save_pic)
+    save_picture(p, title, save_pic, dpi)
 
     return(p)
 
