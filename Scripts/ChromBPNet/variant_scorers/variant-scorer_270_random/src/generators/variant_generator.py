@@ -1,0 +1,111 @@
+from tensorflow.keras.utils import Sequence
+import pandas as pd
+import numpy as np
+import math
+import pyfaidx
+from utils import one_hot
+from deeplift.dinuc_shuffle import dinuc_shuffle
+
+
+class VariantGenerator(Sequence):
+    def __init__(self,
+                 variants_table,
+                 input_len,
+                 genome_fasta,
+                 batch_size=512,
+                 debug_mode=False,
+                 shuf=False):
+
+        self.variants_table = variants_table
+        self.num_variants = self.variants_table.shape[0]
+        self.input_len = input_len
+        self.genome = pyfaidx.Fasta(genome_fasta)
+        self.debug_mode = debug_mode
+        self.flank_size = self.input_len // 2
+        self.shuf = shuf
+        self.batch_size = batch_size
+
+    def __get_allele_seq__(self, chrom, pos_, allele1, allele2, seed=-1):
+        chrom = str(chrom)
+        pos_= int(pos_)
+        pos= pos_//10
+        strand= pos_%10
+        allele1 = str(allele1)
+        allele2 = str(allele2)
+        
+        if allele1 == "-":
+            allele1 = ""
+        if allele2 == "-":
+            allele2 = ""
+        # 1 - indexed position 
+        pos = pos - 1
+        
+        if len(allele1) == len(allele2):
+            flank  = str(self.genome[chrom][pos-100:pos+100])
+            if self.shuf:
+                assert seed != -1
+                flank = dinuc_shuffle(flank, rng=np.random.RandomState(seed))
+
+            allele1_seq = flank[:100] + allele1 + flank[101:]
+            allele2_seq = flank[:100] + allele2 + flank[101:]
+
+            import random
+            bases= ['G', 'C', 'T', 'A']
+            weights= [20, 20, 30, 30]
+            random.seed(44)
+            random_pad= random.choices(bases, weights=weights, k=922)
+
+            allele1_seq= random_pad + allele1_seq + random_pad
+            allele2_seq= random_pad + allele2_seq + random_pad
+            
+        ### handle INDELS (allele1 must be the reference allele)
+        else:
+            ### hg19 has lower case
+            assert len(allele1) != len(allele2)
+            allele1= allele1.upper()
+            allele2= allele2.upper()
+            if (self.genome[chrom][pos:pos+len(allele1)].seq.upper() != allele1): print('NOT_URA_:(', pos, chrom, 'p', self.genome[chrom][pos:pos+len(allele1)].seq,'p',  allele1, 'p', allele2)
+            #assert self.genome[chrom][pos:pos+len(allele1)].seq.upper() == allele1
+            mismatch_length = len(allele1) - len(allele2)
+            if mismatch_length > 0:
+                flank = str(self.genome[chrom][pos-self.flank_size:pos+self.flank_size+mismatch_length])
+            else:
+                flank = str(self.genome[chrom][pos-self.flank_size:pos+self.flank_size])
+
+            if self.shuf:
+                assert seed != -1
+                flank = dinuc_shuffle(flank, rng=np.random.RandomState(seed))
+
+            left_flank=flank[:self.flank_size]
+
+            allele1_right_flank = flank[self.flank_size+len(allele1):self.flank_size*2]
+            allele2_right_flank = flank[self.flank_size+len(allele1):self.flank_size*2+mismatch_length]
+            
+            allele1_seq = left_flank + allele1 + allele1_right_flank
+            allele2_seq = left_flank + allele2 + allele2_right_flank
+
+        #print(pos, right_flank_window, allele1, allele2)
+
+        assert len(allele1_seq) == self.flank_size * 2
+        assert len(allele2_seq) == self.flank_size * 2
+        return allele1_seq, allele2_seq
+
+    def __getitem__(self, idx):
+        cur_entries = self.variants_table.iloc[idx*self.batch_size:min([self.num_variants,(idx+1)*self.batch_size])]
+        variant_ids = cur_entries['variant_id'].tolist()
+
+        if self.shuf:
+            allele1_seqs, allele2_seqs = zip(*[self.__get_allele_seq__(v, w, x, y, z) for v,w,x,y,z in
+                                             zip(cur_entries.chr, cur_entries.pos,
+                                                 cur_entries.allele1, cur_entries.allele2, cur_entries.random_seed)])
+        else:
+            allele1_seqs, allele2_seqs = zip(*[self.__get_allele_seq__(w, x, y, z) for w,x,y,z in
+                                             zip(cur_entries.chr, cur_entries.pos, cur_entries.allele1, cur_entries.allele2)])
+
+        if self.debug_mode:
+            return variant_ids, list(allele1_seqs),list(allele2_seqs)
+        else:
+            return variant_ids, one_hot.dna_to_one_hot(list(allele1_seqs)), one_hot.dna_to_one_hot(list(allele2_seqs))
+    
+    def __len__(self):
+        return math.ceil(self.num_variants/self.batch_size)
