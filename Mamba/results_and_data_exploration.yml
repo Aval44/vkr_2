@@ -1,0 +1,36 @@
+name: results_and_data_exploration
+channels:
+  - conda-forge
+dependencies:
+  - catboost
+  - h5py
+  - jupyter
+  - logomaker
+  - mizani
+  - numba
+  - numpy
+  - pandas
+  - patchworklib
+  - plotnine
+  - polars
+  - python=3.13
+  - pytorch
+  - scikit-learn
+  - scipy
+  - seaborn
+  - tqdm
+  - pip:
+    - CrossMap==0.7.3
+    - MACS3==3.0.4
+    - bpnet-lite==1.0.0
+    - bx-python==0.14.0
+    - cykhash==2.0.1
+    - hmmlearn==0.3.3
+    - pyBigWig==0.3.25
+    - pyarrow==23.0.0
+    - pysam==0.23.3
+    - setuptools==82.0.1
+    - tangermeme==1.0.3
+    - tinycss2==1.4.0
+    - venn==0.1.3
+    - wheel==0.46.3
