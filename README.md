@@ -1,3 +1,3 @@
 # Магистерская работа
 ## МАШИННОЕ ОБУЧЕНИЕ ДЛЯ ОЦЕНКИ ВЛИЯНИЯ ОДНОНУКЛЕОТИДНЫХ ЗАМЕН В РЕГУЛЯТОРНЫХ ОБЛАСТЯХ НА ЭКСПРЕССИЮ ГЕНОВ НА ОСНОВЕ ДАННЫХ МАССОВЫХ ПАРАЛЛЕЛЬНЫХ РЕПОРТЕРНЫХ ЭКСПЕРИМЕНТОВ
-(ссылка на работу)[https://drive.google.com/drive/folders/1pjtc_WDWVh5EHaLzcrbl0e162p79GmAJ?usp=sharing]
+[ссылка на работу](https://drive.google.com/drive/folders/1pjtc_WDWVh5EHaLzcrbl0e162p79GmAJ?usp=sharing)
